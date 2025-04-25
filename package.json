@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "swagger-autogen": "ts-node ./src/swagger/swagger.ts"
