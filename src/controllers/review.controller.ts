@@ -12,6 +12,15 @@ type ReviewCreateRequest = Request<{}, {}, {
   tags: string[];
 }>;
 
+export const getReviews = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const reviews = await prisma.review.findMany({
+    where: { bookId: id },
+  });
+  res.json(reviews);
+};
+
+
 export const createReview = async (req: ReviewCreateRequest, res: Response) => {
   try {
     const { bookId, userId, title, description, rating, tags } = req.body;
