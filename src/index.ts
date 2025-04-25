@@ -1,152 +1,43 @@
-import { Prisma, PrismaClient } from '@prisma/client'
-import express from 'express'
+import express, { RequestHandler } from 'express'
+import swaggerUi from 'swagger-ui-express' //ui 설정할 수 있는 모듈 불러오기
+import { readFileSync } from 'fs'
+import { join } from 'path'
+const swaggerJson = JSON.parse(readFileSync(join(__dirname, 'swagger.json'), 'utf-8')) // api가 세팅된 json파일
+import dotenv from 'dotenv'
+import authRoutes from './routes/auth.routes'
+import userRoutes from './routes/user.routes'
+import bookRoutes from './routes/book.routes'
+import reviewRoutes from './routes/review.routes'
+import tagRoutes from './routes/tag.routes'
+import replyRoutes from './routes/reply.routes'
+import commentRoutes from './routes/comment.routes'
+import { authMiddleware } from './middleware/auth.middleware'
+import categoryRoutes from './routes/category.routes'
 
-const prisma = new PrismaClient()
+dotenv.config()
+
 const app = express()
+const PORT = process.env.PORT || 3000
 
+// Middleware
 app.use(express.json())
 
-app.post(`/signup`, async (req, res) => {
-  const { name, email, posts } = req.body
+// Routes
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerJson));
+app.use('/api/auth', authRoutes)
+app.use('/api/user', authMiddleware as RequestHandler, userRoutes)
+app.use('/api/books', authMiddleware as RequestHandler, bookRoutes)
+app.use('/api/categories', authMiddleware as RequestHandler, categoryRoutes)
+app.use('/api/reviews', authMiddleware as RequestHandler, reviewRoutes)
+app.use('/api/tags', authMiddleware as RequestHandler, tagRoutes)
+app.use('/api/replies', replyRoutes)
+app.use('/api/comments', commentRoutes)
 
-  const postData = posts?.map((post: Prisma.PostCreateInput) => {
-    return { title: post?.title, content: post?.content }
-  })
-
-  const result = await prisma.user.create({
-    data: {
-      name,
-      email,
-      posts: {
-        create: postData,
-      },
-    },
-  })
-  res.json(result)
+// Health check route
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK' })
 })
 
-app.post(`/post`, async (req, res) => {
-  const { title, content, authorEmail } = req.body
-  const result = await prisma.post.create({
-    data: {
-      title,
-      content,
-      author: { connect: { email: authorEmail } },
-    },
-  })
-  res.json(result)
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`)
 })
-
-app.put('/post/:id/views', async (req, res) => {
-  const { id } = req.params
-
-  try {
-    const post = await prisma.post.update({
-      where: { id: Number(id) },
-      data: {
-        viewCount: {
-          increment: 1,
-        },
-      },
-    })
-
-    res.json(post)
-  } catch (error) {
-    res.json({ error: `Post with ID ${id} does not exist in the database` })
-  }
-})
-
-app.put('/publish/:id', async (req, res) => {
-  const { id } = req.params
-
-  try {
-    const postData = await prisma.post.findUnique({
-      where: { id: Number(id) },
-      select: {
-        published: true,
-      },
-    })
-
-    const updatedPost = await prisma.post.update({
-      where: { id: Number(id) || undefined },
-      data: { published: !postData?.published },
-    })
-    res.json(updatedPost)
-  } catch (error) {
-    res.json({ error: `Post with ID ${id} does not exist in the database` })
-  }
-})
-
-app.delete(`/post/:id`, async (req, res) => {
-  const { id } = req.params
-  const post = await prisma.post.delete({
-    where: {
-      id: Number(id),
-    },
-  })
-  res.json(post)
-})
-
-app.get('/users', async (req, res) => {
-  const users = await prisma.user.findMany()
-  res.json(users)
-})
-
-app.get('/user/:id/drafts', async (req, res) => {
-  const { id } = req.params
-
-  const drafts = await prisma.user
-    .findUnique({
-      where: {
-        id: Number(id),
-      },
-    })
-    .posts({
-      where: { published: false },
-    })
-
-  res.json(drafts)
-})
-
-app.get(`/post/:id`, async (req, res) => {
-  const { id }: { id?: string } = req.params
-
-  const post = await prisma.post.findUnique({
-    where: { id: Number(id) },
-  })
-  res.json(post)
-})
-
-app.get('/feed', async (req, res) => {
-  const { searchString, skip, take, orderBy } = req.query
-
-  const or: Prisma.PostWhereInput = searchString
-    ? {
-        OR: [
-          { title: { contains: searchString as string } },
-          { content: { contains: searchString as string } },
-        ],
-      }
-    : {}
-
-  const posts = await prisma.post.findMany({
-    where: {
-      published: true,
-      ...or,
-    },
-    include: { author: true },
-    take: Number(take) || undefined,
-    skip: Number(skip) || undefined,
-    orderBy: {
-      updatedAt: orderBy as Prisma.SortOrder,
-    },
-  })
-
-  res.json(posts)
-})
-
-const server = app.listen(3000, () =>
-  console.log(`
-🚀 Server ready at: http://localhost:3000
-⭐️ See sample requests: https://github.com/prisma/prisma-examples/blob/latest/orm/express/README.md#using-the-rest-api`),
-)
