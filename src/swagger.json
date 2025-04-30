@@ -1160,6 +1160,16 @@
       }
     },
     "/api/reviews/": {
+      "get": {
+        "tags": ["Review"],
+        "summary": "Get all reviews",
+        "description": "Returns all reviews",
+        "responses": {
+          "200": {
+            "description": "Reviews retrieved successfully"
+          }
+        }
+      },
       "post": {
         "tags": ["Review"],
         "summary": "Create a new review",
