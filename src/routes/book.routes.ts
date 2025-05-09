@@ -1,10 +1,56 @@
-import { RequestHandler, Router } from 'express';
-import { createBook, updateBook, deleteBook, getBook, getBookByIsbn } from '../controllers/book.controller';
-import { adminMiddleware } from '../middleware/admin.middleware';
+import { RequestHandler, Router } from "express";
+import {
+  getBooks,
+  createBook,
+  updateBook,
+  deleteBook,
+  getBook,
+  getBookByIsbn,
+} from "../controllers/book.controller";
+import { adminMiddleware } from "../middleware/admin.middleware";
 
 const router = Router();
 
-// router.get("/", getBooks as RequestHandler);
+/**
+ * @swagger
+ * /api/books:
+ *   get:
+ *     tags:
+ *       - Books
+ *     summary: Search for books
+ *     description: Retrieve all books from the database
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: false
+ *         type: string
+ *         description: Search query
+ *       - in: query
+ *         name: display
+ *         required: false
+ *         type: number
+ *         description: Number of books to display
+ *       - in: query
+ *         name: start
+ *         required: false
+ *         type: number
+ *         description: Start index
+ *       - in: query
+ *         name: sort
+ *         required: false
+ *         type: string
+ *         description: Sort order
+ *     responses:
+ *       200:
+ *         description: Books found
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/", getBooks as unknown as RequestHandler);
 
 /**
  * @swagger
@@ -16,33 +62,12 @@ const router = Router();
  *     description: Add a new book to the database
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *               - isbn
- *               - author
- *             properties:
- *               title:
- *                 type: string
- *               isbn:
- *                 type: string
- *               author:
- *                 type: string
- *               description:
- *                 type: string
- *               coverImage:
- *                 type: string
- *               categoryId:
- *                 type: string
- *               tags:
- *                 type: array
- *                 items:
- *                   type: string
+ *     parameters:
+ *       - in: query
+ *         name: isbn
+ *         required: true
+ *         type: string
+ *         description: Book ISBN
  *     responses:
  *       201:
  *         description: Book created successfully
@@ -51,7 +76,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.post('/', createBook as RequestHandler);
+router.post("/", createBook as unknown as RequestHandler);
 
 /**
  * @swagger
@@ -103,7 +128,7 @@ router.post('/', createBook as RequestHandler);
  *       404:
  *         description: Book not found
  */
-router.get('/:id', getBook as RequestHandler);
+router.get("/:id", getBook as RequestHandler);
 
 /**
  * @swagger
@@ -155,7 +180,7 @@ router.get('/:id', getBook as RequestHandler);
  *       404:
  *         description: Book not found
  */
-router.get('/isbn/:isbn', getBookByIsbn as RequestHandler);
+router.get("/isbn/:isbn", getBookByIsbn as RequestHandler);
 
 /**
  * @swagger
@@ -183,18 +208,20 @@ router.get('/isbn/:isbn', getBookByIsbn as RequestHandler);
  *             properties:
  *               title:
  *                 type: string
+ *               link:
+ *                 type: string
+ *               image:
+ *                 type: string
  *               author:
+ *                 type: string
+ *               publisher:
+ *                 type: string
+ *               pubDate:
  *                 type: string
  *               description:
  *                 type: string
- *               coverImage:
- *                 type: string
  *               categoryId:
  *                 type: string
- *               tags:
- *                 type: array
- *                 items:
- *                   type: string
  *     responses:
  *       200:
  *         description: Book updated successfully
@@ -207,7 +234,11 @@ router.get('/isbn/:isbn', getBookByIsbn as RequestHandler);
  *       404:
  *         description: Book not found
  */
-router.patch('/:id', adminMiddleware as RequestHandler, updateBook as RequestHandler);
+router.patch(
+  "/:id",
+  adminMiddleware as RequestHandler,
+  updateBook as RequestHandler
+);
 
 /**
  * @swagger
@@ -236,6 +267,10 @@ router.patch('/:id', adminMiddleware as RequestHandler, updateBook as RequestHan
  *       404:
  *         description: Book not found
  */
-router.delete('/:id', adminMiddleware as RequestHandler, deleteBook as RequestHandler);
+router.delete(
+  "/:id",
+  adminMiddleware as RequestHandler,
+  deleteBook as RequestHandler
+);
 
-export default router; 
+export default router;

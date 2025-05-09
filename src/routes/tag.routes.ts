@@ -1,5 +1,5 @@
 import { Router, RequestHandler } from 'express';
-import { createTag, getTags, updateTag, deleteTag } from '../controllers/tag.controller';
+import { createTag, getTags, getTag, updateTag, deleteTag } from '../controllers/tag.controller';
 
 const router = Router();
 
@@ -58,6 +58,38 @@ router.post('/', createTag as RequestHandler);
  *                     type: string
  */
 router.get('/', getTags as RequestHandler);
+
+/**
+ * @swagger
+ * /api/tags/{id}:
+ *   get:
+ *     tags:
+ *       - Tags
+ *     summary: Get a tag by ID
+ *     description: Retrieve a specific tag using its ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tag ID
+ *     responses:
+ *       200:
+ *         description: Tag found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                   description:
+ *                     type: string
+ */
+router.get('/:id', getTag as RequestHandler);
 
 /**
  * @swagger

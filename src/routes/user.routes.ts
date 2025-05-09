@@ -1,11 +1,11 @@
 import { RequestHandler, Router } from 'express';
-import { getUser, updateUser, deleteUser } from '../controllers/user.controller';
+import { getUser, updateUser, deleteUser, userBadges, changePrimaryBadge, changeFavoriteBook } from '../controllers/user.controller';
 
 const router = Router();
 
 /**
  * @swagger
- * /api/users:
+ * /api/user:
  *   get:
  *     tags:
  *       - Users
@@ -39,7 +39,7 @@ router.get('/', getUser as RequestHandler);
 
 /**
  * @swagger
- * /api/users:
+ * /api/user:
  *   patch:
  *     tags:
  *       - Users
@@ -54,11 +54,12 @@ router.get('/', getUser as RequestHandler);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               username:
  *                 type: string
- *               email:
+ *               password:
  *                 type: string
- *                 format: email
+ *               image:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User profile updated successfully
@@ -71,7 +72,7 @@ router.patch('/', updateUser as RequestHandler);
 
 /**
  * @swagger
- * /api/users:
+ * /api/user:
  *   delete:
  *     tags:
  *       - Users
@@ -86,5 +87,95 @@ router.patch('/', updateUser as RequestHandler);
  *         description: Unauthorized
  */
 router.delete('/', deleteUser as RequestHandler);
+
+/**
+ * @swagger
+ * /api/user/badges:
+ *   get:
+ *     tags:
+ *       - Users
+ *     summary: Get user badges
+ *     description: Retrieve the badges of the currently authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User badges retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/badges', userBadges as RequestHandler);
+
+/**
+ * @swagger
+ * /api/user/primary-badge:
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Change primary badge
+ *     description: Change the primary badge of the currently authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               primaryBadge:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Primary badge changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.patch('/primary-badge', changePrimaryBadge as RequestHandler);
+
+/**
+ * @swagger
+ * /api/user/favorite-book:
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Change favorite book
+ *     description: Change the favorite book of the currently authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               favoriteBook:
+ *                 type: string 
+ *     responses:
+ *       200:
+ *         description: Favorite book changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.patch('/favorite-book', changeFavoriteBook as RequestHandler);
 
 export default router; 

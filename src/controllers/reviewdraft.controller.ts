@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-type ReviewCreateRequest = Request<{}, {}, {
+type ReviewDraftCreateRequest = Request<{}, {}, {
   bookId: string;
   userId: string;
   title: string;
@@ -12,16 +12,7 @@ type ReviewCreateRequest = Request<{}, {}, {
   tags: string[];
 }>;
 
-export const getReviews = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const reviews = await prisma.review.findMany({
-    where: { bookId: id },
-  });
-  res.json(reviews);
-};
-
-
-export const createReview = async (req: ReviewCreateRequest, res: Response) => {
+export const createReviewDraft = async (req: ReviewDraftCreateRequest, res: Response) => {
   try {
     const { bookId, title, description, rating, tags } = req.body;
     const userId = req.user?.userId;
@@ -73,12 +64,13 @@ export const createReview = async (req: ReviewCreateRequest, res: Response) => {
     );
 
     // Create review
-    const newReview = await prisma.review.create({
+    const newReview = await prisma.reviewDraft.create({
       data: {
         bookId,
         authorId: userId,
         title,
         description,
+        rating,
         tags: {
           connect: tagConnections,
         },
@@ -88,20 +80,10 @@ export const createReview = async (req: ReviewCreateRequest, res: Response) => {
       },
     });
 
-    // Create rating separately
-    await prisma.rating.create({
-      data: {
-        bookId,
-        reviewId: newReview.id,
-        rating,
-      },
-    });
-
     // Fetch the complete review with rating
-    const reviewWithRating = await prisma.review.findUnique({
+    const reviewWithRating = await prisma.reviewDraft.findUnique({
       where: { id: newReview.id },
       include: {
-        rating: true,
         tags: true,
       },
     });
@@ -113,7 +95,7 @@ export const createReview = async (req: ReviewCreateRequest, res: Response) => {
   }
 };
 
-export const updateReview = async (req: Request, res: Response) => {
+export const updateReviewDraft = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { title, description, rating, tags } = req.body;
@@ -154,7 +136,7 @@ export const updateReview = async (req: Request, res: Response) => {
     }
 
     // Update review
-    const updatedReview = await prisma.review.update({
+    const updatedReviewDraft = await prisma.reviewDraft.update({
       where: { id },
       data: {
         title,
@@ -167,7 +149,6 @@ export const updateReview = async (req: Request, res: Response) => {
         }),
       },
       include: {
-        rating: true,
         tags: true,
       },
     });
@@ -190,10 +171,9 @@ export const updateReview = async (req: Request, res: Response) => {
     }
 
     // Fetch the complete review with updated rating
-    const reviewWithUpdatedRating = await prisma.review.findUnique({
+    const reviewWithUpdatedRating = await prisma.reviewDraft.findUnique({
       where: { id },
       include: {
-        rating: true,
         tags: true,
       },
     });
@@ -204,28 +184,3 @@ export const updateReview = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-
-export const deleteReview = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    // Check if review exists
-    const existingReview = await prisma.review.findUnique({
-      where: { id },
-    });
-
-    if (!existingReview) {
-      return res.status(404).json({ message: 'Review not found' });
-    }
-
-    // Delete review (this will cascade delete the rating and tag connections)
-    await prisma.review.delete({
-      where: { id },
-    });
-
-    res.status(204).send();
-  } catch (error) {
-    console.error('Delete review error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-}; 

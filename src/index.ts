@@ -35,33 +35,37 @@ app.use(express.json());
 // Swagger UI options
 const swaggerUiOptions = {
   explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
+  customCss: ".swagger-ui .topbar { display: none }",
   swaggerOptions: {
     persistAuthorization: true,
     displayRequestDuration: true,
-    docExpansion: 'none',
+    docExpansion: "none",
     filter: true,
     showExtensions: true,
     showCommonExtensions: true,
-    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+    supportedSubmitMethods: ["get", "post", "put", "delete", "patch"],
     tryItOutEnabled: true,
     syntaxHighlight: {
       activate: true,
-      theme: 'monokai'
-    }
-  }
+      theme: "monokai",
+    },
+  },
 };
 
 // Routes
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(options), swaggerUiOptions));
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerJSDoc(options), swaggerUiOptions)
+);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", authMiddleware as RequestHandler, userRoutes);
 app.use("/api/books", authMiddleware as RequestHandler, bookRoutes);
 app.use("/api/categories", authMiddleware as RequestHandler, categoryRoutes);
 app.use("/api/reviews", authMiddleware as RequestHandler, reviewRoutes);
 app.use("/api/tags", authMiddleware as RequestHandler, tagRoutes);
-app.use("/api/replies", replyRoutes);
-app.use("/api/comments", commentRoutes);
+app.use("/api/replies", authMiddleware as RequestHandler, replyRoutes);
+app.use("/api/comments", authMiddleware as RequestHandler, commentRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -70,7 +74,7 @@ app.get("/health", (req, res) => {
 
 // Health check route
 app.get("/", (req, res) => {
-  res.json({ status: "OK" });
+  res.json({ status: "Hello World!" });
 });
 
 app.listen(PORT, () => {

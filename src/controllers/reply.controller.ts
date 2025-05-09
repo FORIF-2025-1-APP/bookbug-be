@@ -55,9 +55,9 @@ export const getReplies = async (req: Request, res: Response) => {
       where: { reviewId },
       include: {
         author: true,
-        comments: {
-          include: {
-            author: true,
+        _count: {
+          select: {
+            comments: true,
           },
         },
       },

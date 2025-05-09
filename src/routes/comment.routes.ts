@@ -27,10 +27,10 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
- *               - content
+ *               - comment
  *               - replyId
  *             properties:
- *               content:
+ *               comment:
  *                 type: string
  *               replyId:
  *                 type: string
@@ -71,7 +71,7 @@ router.post('/', authMiddleware as RequestHandler, createComment as RequestHandl
  *                 properties:
  *                   id:
  *                     type: string
- *                   content:
+ *                   comment:
  *                     type: string
  *                   userId:
  *                     type: string
@@ -110,7 +110,7 @@ router.get('/reply/:replyId', getComments as RequestHandler);
  *               properties:
  *                 id:
  *                   type: string
- *                 content:
+ *                 comment:
  *                   type: string
  *                 userId:
  *                   type: string
@@ -148,9 +148,9 @@ router.get('/:id', getComment as RequestHandler);
  *           schema:
  *             type: object
  *             required:
- *               - content
+ *               - comment
  *             properties:
- *               content:
+ *               comment:
  *                 type: string
  *     responses:
  *       200:

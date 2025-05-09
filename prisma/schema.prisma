@@ -17,6 +17,8 @@ model User {
   image         String?
   role          String    @default("user") // "user" or "admin"
   readlist      Book[]
+  favoriteBook  Book?     @relation("FavoriteBook", fields: [favoriteBookId], references: [id])
+  favoriteBookId String?
   badges        Badge[]
   primaryBadge  Badge?    @relation("PrimaryBadge", fields: [primaryBadgeId], references: [id])
   primaryBadgeId String?
@@ -57,6 +59,7 @@ model Book {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   ratings       Rating[]
+  favoriteUsers User[]    @relation("FavoriteBook")
 }
 
 model Rating {
@@ -101,6 +104,7 @@ model ReviewDraft {
   authorId      String
   title         String
   description   String
+  rating        Int
   tags          Tag[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

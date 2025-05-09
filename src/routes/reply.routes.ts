@@ -21,10 +21,10 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
- *               - content
+ *               - reply
  *               - reviewId
  *             properties:
- *               content:
+ *               reply:
  *                 type: string
  *               reviewId:
  *                 type: string
@@ -142,9 +142,9 @@ router.get('/:id', getReply as RequestHandler);
  *           schema:
  *             type: object
  *             required:
- *               - content
+ *               - reply
  *             properties:
- *               content:
+ *               reply:
  *                 type: string
  *     responses:
  *       200:

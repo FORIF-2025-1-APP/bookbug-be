@@ -1,11 +1,15 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-type TagCreateRequest = Request<{}, {}, {
-  name: string;
-}>;
+type TagCreateRequest = Request<
+  {},
+  {},
+  {
+    name: string;
+  }
+>;
 
 export const createTag = async (req: TagCreateRequest, res: Response) => {
   try {
@@ -17,7 +21,7 @@ export const createTag = async (req: TagCreateRequest, res: Response) => {
     });
 
     if (existingTag) {
-      return res.status(400).json({ message: 'Tag already exists' });
+      return res.status(400).json({ message: "Tag already exists" });
     }
 
     // Create tag
@@ -27,21 +31,43 @@ export const createTag = async (req: TagCreateRequest, res: Response) => {
 
     res.status(201).json(newTag);
   } catch (error) {
-    console.error('Create tag error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Create tag error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 export const getTags = async (_req: Request, res: Response) => {
   try {
     const tags = await prisma.tag.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
 
     res.json(tags);
   } catch (error) {
-    console.error('Get tags error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Get tags error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getTag = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const tag = await prisma.tag.findUnique({
+      where: { id },
+      include: {
+        reviews: true,
+      },
+    });
+
+    if (!tag) {
+      return res.status(404).json({ message: "Tag not found" });
+    }
+
+    res.json(tag);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -56,7 +82,7 @@ export const updateTag = async (req: Request, res: Response) => {
     });
 
     if (!existingTag) {
-      return res.status(404).json({ message: 'Tag not found' });
+      return res.status(404).json({ message: "Tag not found" });
     }
 
     // Check if new name already exists
@@ -68,7 +94,7 @@ export const updateTag = async (req: Request, res: Response) => {
     });
 
     if (duplicateTag) {
-      return res.status(400).json({ message: 'Tag name already exists' });
+      return res.status(400).json({ message: "Tag name already exists" });
     }
 
     const updatedTag = await prisma.tag.update({
@@ -78,8 +104,8 @@ export const updateTag = async (req: Request, res: Response) => {
 
     res.json(updatedTag);
   } catch (error) {
-    console.error('Update tag error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Update tag error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -93,7 +119,7 @@ export const deleteTag = async (req: Request, res: Response) => {
     });
 
     if (!existingTag) {
-      return res.status(404).json({ message: 'Tag not found' });
+      return res.status(404).json({ message: "Tag not found" });
     }
 
     await prisma.tag.delete({
@@ -102,7 +128,7 @@ export const deleteTag = async (req: Request, res: Response) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error('Delete tag error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Delete tag error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
-}; 
+};
