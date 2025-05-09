@@ -56,6 +56,7 @@ export const register = async (req: AuthRequest, res: Response) => {
 
 export const login = async (req: AuthRequest, res: Response) => {
   try {
+    console.log(req.body);
     const { email, password } = req.body;
 
     // Find user

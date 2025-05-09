@@ -4,23 +4,24 @@ services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - "3300:3000"
     environment:
       - PORT=3000
       # change based on your db settings below (postgres:postgres -> username:password)
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/bookbug?schema=public
       - JWT_SECRET=your_jwt_secret_here
+      - NODE_ENV=production
     depends_on:
       - db
     volumes:
-      - .:/usr/src/app
       - /usr/src/app/node_modules
+      - /usr/src/app/dist
     command: sh -c "npx prisma migrate deploy && npm start"
 
   db:
     image: postgres:15
     ports:
-      - "5432:5432"
+      - "3301:5432"
     environment:
       - POSTGRES_USER=postgres # username (need change)
       - POSTGRES_PASSWORD=postgres # password (need change)
